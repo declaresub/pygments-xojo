@@ -11,7 +11,7 @@ Lexer for the Xojo language.
 
 from __future__ import absolute_import
 import re
-from pygments.lexer import RegexLexer, words
+from pygments.lexer import RegexLexer, words, include
 from pygments.token import Keyword, Name, String, Literal, Number, Punctuation, Comment, \
     Operator, Text
 
@@ -26,8 +26,8 @@ class XojoLexer(RegexLexer):
 
     #pylint: disable=bad-continuation
     IDENTIFIER = r'[^\d\W]\w*'
-    BUILTINS = ('AddHandler', 'AddressOf', 'Array', 'Call', 'Ctype', 'CurrentMethodName',
-     'GetTypeInfo', 'Raise', 'RaiseEvent', 'Redim', 'RemoveHandler', 'WeakAddressOf')
+    BUILTINS = ('AddHandler', 'Call','CurrentMethodName',
+    'Raise',  'RemoveHandler')
     KEYWORDS = ('Aggregates', 'As', 'Assigns', 'Attributes', 'Break', 'ByRef', 'ByVal',
     'Case', 'Catch', 'Class', 'Continue', 'Declare', 'Delegate', 'Do', 'DownTo', 'Each',
     'Enum', 'Else', 'ElseIf', 'End', 'Event', 'Exception', 'Exit', 'Extends', 'Finally',
@@ -36,10 +36,16 @@ class XojoLexer(RegexLexer):
     'Protected', 'Public', 'Return', 'Select', 'Selector', 'Soft', 'Step', 'Structure',
     'Sub', 'Then', 'To', 'Try', 'Until', 'Wend', 'While', 'With', 'WithEvents',
     '#if', '#else', '#endif', '#pragma')
-    OPERATOR_WORDS = ('And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor')
+    OPERATOR_WORDS = ('And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor', 'AddressOf', 'Array',
+    'Ctype', 'GetTypeInfo', 'RaiseEvent', 'Redim', 'WeakAddressOf')
+    
     tokens = {
+        'ignorable_whitespace': [
+            (r'[\ \t]+', Text),
+            ],
+            
         'root': [
-            (r'\ +', Text),
+            include('ignorable_whitespace'),
             (words(('const', 'dim', 'static'), suffix=r'\b'), Keyword.Declaration),
             (words(('false', 'nil', 'true'), suffix=r'\b'), Keyword.Constant),
             (words(BUILTINS, suffix=r'\b'), Name.Builtin),
@@ -64,7 +70,7 @@ class XojoLexer(RegexLexer):
             (r'//.*', Comment),
             (r'REM\b.*', Comment),
 
-            (r'[\=\+\-\*/^]{1,1}', Operator),
+            (r'(<=?)|(>=?)|(<>)|[\=\+\-\*/\^\<\>]', Operator),
             (words(OPERATOR_WORDS, prefix=r'\b', suffix=r'\b'), Operator.Word),
             (r'[(),.:]', Punctuation),
             (r'[^\d\W]\w*:', Name.Label),
@@ -72,12 +78,12 @@ class XojoLexer(RegexLexer):
             ],
 
         'using_ns': [
-            (r'\ +', Text),
+            include('ignorable_whitespace'),
             (r'[^\d\W]\w*(.[^\d\W]\w*)*', Name.Namespace, '#pop'),
             ],
 
         'goto': [
-            (r'\ +', Text),
+            include('ignorable_whitespace'),
             (IDENTIFIER, Name.Label, '#pop'),
             ],
         }
