@@ -1,0 +1,4 @@
+#packages listed here are for local testing use.
+
+pylint
+pytest
