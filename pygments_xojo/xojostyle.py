@@ -6,11 +6,14 @@ Style for the Xojo language.
 
 from pygments.style import Style
 from pygments.token import Keyword, Name, Comment, String, Error, \
-     Number, Operator, Generic
+     Number, Operator, Generic, Whitespace
 
 __all__ = ['XojoStyle']
 
+#pylint: disable=too-few-public-methods
 class XojoStyle(Style):
+    """The default Xojo style."""
+
     default_style = ""
     styles = {
         Whitespace: "#bbbbbb",
@@ -60,5 +63,5 @@ class XojoStyle(Style):
         Generic.Output: "#888",
         Generic.Traceback: "#04D",
 
-        Error: "border:#FF0000"    
+        Error: "border:#FF0000"
         }
