@@ -40,7 +40,7 @@ class XojoStyle(Style):
         Name.Attribute: "#7D9029",
         Name.Tag: "bold #008000",
         Name.Decorator: "#AA22FF",
-        Name.XojoType: 'italic #888',
+        Name.XojoType: '#010101',
 
         String: "#BA2121",
         String.Doc: "italic",
