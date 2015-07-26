@@ -18,7 +18,7 @@ class Tox(TestCommand):
         sys.exit(errcode)
 
 def package_version():
-    with io.open('xojolexer/__init__.py', 'r', encoding='utf-8') as f:
+    with io.open('pygments_xojo/__init__.py', 'r', encoding='utf-8') as f:
         for sourceline in f:
             if sourceline.strip().startswith('__version__'):
                  return sourceline.split('=', 1)[1].strip(string.whitespace + '"\'')
@@ -28,8 +28,8 @@ def package_version():
 setup(name='xojolexer',
     version=package_version(),
     author='Charles Yeomans', 
-    packages=['xojolexer'],
+    packages=['pygments_xojo'],
     install_requires=['pygments'],
-    entry_points = {'pygments.lexers': ['xojo = xojolexer.xojo:XojoLexer']},
+    entry_points = {'pygments.lexers': ['xojo = xojolexer.xojo:XojoLexer'], 'pygments.styles': ['xojo = xojolexer.xojostyle:XojoStyle']},
     cmdclass = {'test': Tox}
     )
