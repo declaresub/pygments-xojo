@@ -30,6 +30,6 @@ setup(name='xojolexer',
     author='Charles Yeomans', 
     packages=['pygments_xojo'],
     install_requires=['pygments'],
-    entry_points = {'pygments.lexers': ['xojo = xojolexer.xojo:XojoLexer'], 'pygments.styles': ['xojo = xojolexer.xojostyle:XojoStyle']},
+    entry_points = {'pygments.lexers': ['xojo = pygments_xojo.xojo:XojoLexer'], 'pygments.styles': ['xojo = pygments_xojo.xojostyle:XojoStyle']},
     cmdclass = {'test': Tox}
     )
