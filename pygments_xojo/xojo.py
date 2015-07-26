@@ -8,7 +8,7 @@ Lexer for the Xojo language.
 
 from __future__ import absolute_import
 import re
-from pygments.lexer import RegexLexer, words, include, default, bygroups, using
+from pygments.lexer import RegexLexer, words, include, default, using
 from pygments.token import Keyword, Name, String, Literal, Number, Punctuation, Comment, \
     Operator, Text
 
@@ -24,44 +24,47 @@ LITERAL_UNICODE = r'&u[0-9a-fA-F]+'
 WHITESPACE = r'[\ \t]+'
 LITERAL_COLOR_32 = r'&c[0-9a-fA-F]{8}'
 LITERAL_COLOR_24 = r'&c[0-9a-fA-F]{6}'
+DECLARE = r'(soft\s+)?declare[^)]+\)'
 
+#pylint: disable=too-few-public-methods
+class _LexerOptionsMixin(object):
+    """Sets lexer options for Xojo."""
 
-class _InternalLexer(RegexLexer):
-                    
     def __init__(self, *args, **kwargs):
-        #we don't 
         kwargs['ensurenl'] = False
-        super(_InternalLexer, self).__init__(*args, **kwargs)
-        
-class _FunctionParamsLexer(_InternalLexer):
+        super(_LexerOptionsMixin, self).__init__(*args, **kwargs)
+
+class _FunctionParamsLexer(_LexerOptionsMixin, RegexLexer):
+    """An internal lexer for function parameters."""
+
     name = 'xojofunctionparam'
     aliases = ['xojofunctionparam']
-    flags = re.IGNORECASE | re.UNICODE 
-    
+    flags = re.IGNORECASE | re.UNICODE
+
     PARAM_NAME = IDENTIFIER
-    AS = r'as'
+    PARAM_AS = r'as'
     PARAM_TYPE = IDENTIFIER
     PARAM_SEP = r'\,'
-    
+
 
     tokens = {
         'ignorable_whitespace': [
             (WHITESPACE, Text),
             ],
-            
+
         'root': [
             include('ignorable_whitespace'),
-            (PARAM_NAME, Name.Variable, 'param_as'), 
-            ],        
-    
+            (PARAM_NAME, Name.Variable, 'param_as'),
+            ],
+
         'param_as': [
             include('ignorable_whitespace'),
-            (AS, Keyword.Reserved, 'param_type')
+            (PARAM_AS, Keyword.Reserved, 'param_type')
             ],
-            
+
         'param_type': [
             include('ignorable_whitespace'),
-            (PARAM_TYPE, Name.XojoType, 'param_sep'), 
+            (PARAM_TYPE, Name.XojoType, 'param_sep'),
             ],
 
         'param_sep': [
@@ -71,11 +74,15 @@ class _FunctionParamsLexer(_InternalLexer):
             ],
         }
 
-class _DeclareSubLexer(_InternalLexer):
+class _DeclareLexer(_LexerOptionsMixin, RegexLexer):
+    """Internal lexer for declare statements.  Note that for function declares, the
+    'as Typename' bit is handled by XojoLexer."""
+
     name = 'xojodeclaresub'
     aliases = ['xojodeclaresub']
-    flags = re.IGNORECASE | re.UNICODE  
-    
+    flags = re.IGNORECASE | re.UNICODE
+
+    DECLARE_DECL = r'(soft\s+)?declare\s+(function|sub)'
     DECLARE_FUNCTION_NAME = IDENTIFIER
     DECLARE_FUNCTION_ARGS = r'[^)]*'
     DECLARE_LIB = r'lib'
@@ -83,55 +90,60 @@ class _DeclareSubLexer(_InternalLexer):
 
     tokens = {
         'root': [
-            (r'[\ ]+', Text),  
-            (DECLARE_FUNCTION_NAME, Name.Function, 'declare_lib'),
+            (r'[\ ]+', Text),
+            (DECLARE_DECL, Keyword.Reserved, 'declare_function_name'),
             ],
 
         'whitespace': [
             (WHITESPACE, Text),
             ],
-       
+
+        'declare_function_name': [
+            (r'[\ ]+', Text),
+            (DECLARE_FUNCTION_NAME, Name.Function, 'declare_lib'),
+            ],
+
         'declare_lib': [
             include('whitespace'),
             (DECLARE_LIB, Keyword.Reserved, 'declare_lib_name')
             ],
-            
+
         'declare_lib_name': [
             include('whitespace'),
             (LITERAL_STRING, String, 'declare_alias'),
             (LITERAL_UNICODE, Literal, 'declare_alias'),
             (IDENTIFIER_FQ, Name, 'declare_alias'),
             ],
-            
+
         'declare_alias': [
             include('whitespace'),
             (DECLARE_ALIAS, Keyword, 'declare_alias_name'),
             default('declare_function_args_start')
-            ], 
+            ],
 
         'declare_alias_name': [
             include('whitespace'),
             (LITERAL_STRING, String, 'declare_function_args_start'),
             (LITERAL_UNICODE, Literal, 'declare_function_args_start'),
             ],
-            
+
         'declare_function_args_start': [
-            (r'\ +', Text),   
+            (r'\ +', Text),
             (r'\(', Punctuation, 'declare_function_args'),
             ],
-                           
+
         'declare_function_args': [
-            (r'\ +', Text),   
+            (r'\ +', Text),
             (DECLARE_FUNCTION_ARGS, using(_FunctionParamsLexer), 'declare_function_args_end')
             ],
-            
+
         'declare_function_args_end': [
-            (r'\ +', Text),   
+            (r'\ +', Text),
             (r'\)', Punctuation, 'root'),
-            ],             
+            ],
         }
 
-class XojoLexer(_InternalLexer):
+class XojoLexer(_LexerOptionsMixin, RegexLexer):
     """Lexer for Xojo."""
 
     name = 'xojo'
@@ -140,9 +152,9 @@ class XojoLexer(_InternalLexer):
 
     #pylint: disable=bad-continuation
 
-    
-    BUILTINS = ('AddHandler', 'Call','CurrentMethodName',
-    'Raise',  'RemoveHandler')
+
+    BUILTINS = ('AddHandler', 'Call', 'CurrentMethodName',
+    'Raise', 'RemoveHandler')
     KEYWORDS = ('Aggregates', 'As', 'Assigns', 'Attributes', 'Break', 'ByRef', 'ByVal',
     'Case', 'Catch', 'Class', 'Continue', 'Delegate', 'Do', 'DownTo', 'Each',
     'Enum', 'Else', 'ElseIf', 'End', 'Event', 'Exception', 'Exit', 'Extends', 'Finally',
@@ -153,12 +165,12 @@ class XojoLexer(_InternalLexer):
     '#if', '#else', '#endif', '#pragma')
     OPERATOR_WORDS = ('And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor', 'AddressOf', 'Array',
     'Ctype', 'GetTypeInfo', 'RaiseEvent', 'Redim', 'WeakAddressOf')
-    
+
     tokens = {
         'ignorable_whitespace': [
             (r'[\ \t]+', Text),
             ],
-            
+
         'root': [
             include('ignorable_whitespace'),
             (words(('const', 'dim', 'static'), suffix=r'\b'), Keyword.Declaration),
@@ -166,10 +178,11 @@ class XojoLexer(_InternalLexer):
             (words(('Using', 'module'), suffix=r'\b'), Keyword.Namespace, 'namespace_decl'),
             (words(('GOTO',), suffix=r'\b'), Keyword.Reserved, 'goto'),
             (r'as\b', Keyword.Reserved, 'as'),
-            
-            
+
+
             (words(('self', 'me', 'super'), suffix=r'\b'), Name.Builtin.Pseudo),
-            (r'(soft\s+)?declare\s+sub', Keyword.Reserved, 'declare_sub'),
+            (DECLARE, using(_DeclareLexer)),
+            #function|sub declaration
             (words(BUILTINS, suffix=r'\b'), Name.Builtin),
             (words(KEYWORDS, suffix=r'\b'), Keyword.Reserved),
 
@@ -205,13 +218,9 @@ class XojoLexer(_InternalLexer):
             include('ignorable_whitespace'),
             (IDENTIFIER, Name.Label, '#pop'),
             ],
-            
+
         'as': [
             include('ignorable_whitespace'),
             (IDENTIFIER, Name.XojoType, '#pop'),
             ],
-
-       'declare_sub': [
-           (r'[^)]+\)', using(_DeclareSubLexer), '#pop'),
-            ],    
         }

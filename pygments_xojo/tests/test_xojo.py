@@ -6,17 +6,12 @@ from __future__ import absolute_import
 import re
 import pytest
 from pygments.token import *
-from pygments_xojo.xojo import XojoLexer, _FunctionParamsLexer, _DeclareSubLexer
+from pygments_xojo.xojo import XojoLexer, _FunctionParamsLexer, _DeclareLexer, DECLARE
 
 def test_smoke():
     """A basic smoke test."""
     
     assert XojoLexer()
-
-@pytest.mark.parametrize("source", ['x as Ptr)', ')'])
-def test_DECLARE_FUNCTION_ARGS(source):
-    assert re.search(_DeclareSubLexer.DECLARE_FUNCTION_ARGS, source)
-
 
 
 @pytest.mark.parametrize("source, tokens", 
@@ -49,8 +44,19 @@ def test_function_params(source, tokens):
     lexer = _FunctionParamsLexer()
     assert [t for t in lexer.get_tokens(source)] == tokens
 
+@pytest.mark.parametrize("source", ['x as Ptr)', ')'])
+def test_DECLARE_FUNCTION_ARGS(source):
+    assert re.search(_DeclareLexer.DECLARE_FUNCTION_ARGS, source)
+
+
+@pytest.mark.parametrize("source", ['declare function', 'soft declare sub'])    
+def test_DECLARE_DECL(source):
+    assert re.search(_DeclareLexer.DECLARE_DECL, source)
+
 @pytest.mark.parametrize("source, tokens", [
-    ('foo lib "Bar" ()', [
+    ('soft declare sub foo lib "Bar" ()', [
+        (Keyword.Reserved, u'soft declare sub'), 
+        (Token.Text, u' '),        
         (Name.Function, u'foo'),
         (Token.Text, u' '),
         (Keyword.Reserved, u'lib'), 
@@ -61,7 +67,9 @@ def test_function_params(source, tokens):
         (Punctuation, u')'),
         ]),
         
-    ('setValue lib AppKit.framework selector "setValue" (this as Ptr, value as Integer)', [
+    ('declare sub setValue lib AppKit.framework selector "setValue" (this as Ptr, value as Integer)', [
+        (Keyword.Reserved, u'declare sub'), 
+        (Token.Text, u' '),
         (Name.Function, u'setValue'),
         (Token.Text, u' '),
         (Keyword.Reserved, u'lib'), 
@@ -88,11 +96,18 @@ def test_function_params(source, tokens):
         (Punctuation, u')'),
         ]),    
     ])    
-def test_declare_sub(source, tokens):
-    lexer = _DeclareSubLexer()
+def test_declare(source, tokens):
+    lexer = _DeclareLexer()
     for t in lexer.get_tokens(source):
         print(t)
     assert [t for t in lexer.get_tokens(source)] == tokens
+
+@pytest.mark.parametrize("source", ['declare function foo lib "bar" ()'])    
+def test_DECLARE(source):
+    assert re.search(DECLARE, source)
+    
+
+
 
 @pytest.mark.parametrize("source, tokens", 
     [
@@ -104,8 +119,8 @@ def test_declare_sub(source, tokens):
         (Token.Literal.Number.Integer, u'1'),
         ]),
 
-    ('declare sub foo lib "Bar" () as String', [
-        (Token.Keyword.Reserved, u'declare sub'),
+    ('declare function foo lib "Bar" () as String', [
+        (Token.Keyword.Reserved, u'declare function'),
         (Token.Text, u' '),
         (Name.Function, u'foo'),
         (Token.Text, u' '),
