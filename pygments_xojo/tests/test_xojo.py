@@ -135,7 +135,23 @@ def test_DECLARE(source):
         (Token.Text, u' '),
         (Token.Name.XojoType, u'String'),        
         ]),
-            
+    
+    #alias is a keyword only inside a declare statement. 
+    ('dim alias as String = f.Alias', [
+        (Token.Keyword.Declaration, u'dim'),
+        (Token.Text, u' '),
+        (Token.Name.Variable, u'alias'),
+        (Token.Text, u' '),
+        (Keyword.Reserved, u'as'),
+        (Token.Text, u' '),
+        (Token.Name.XojoType, u'String'),  
+        (Token.Text, u' '),        
+        (Token.Operator, u'='),
+        (Token.Text, u' '), 
+        (Name.Variable, u'f'),
+        (Punctuation, u'.'),
+        (Name.Variable, u'Alias'),
+        ]),
     ])
 def test_lexing(source, tokens):    
     lexer = XojoLexer()
