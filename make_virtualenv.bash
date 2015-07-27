@@ -4,8 +4,22 @@
 # Creates virtual environments using the Python executables in $ENV_LIST.  Existing 
 # environments are recreated.
 
+
+PIP="pip"
+VIRTUALENV="virtualenv"
 ENV_LIST="python2 python3"
 ENV_EXT="venv"
+
+#let's make sure that pip and virtualenv are installed.
+if ! hash "$PIP" 2>/dev/null; then
+    echo "The ${PIP} command was not found." >&2
+    exit 1
+fi
+
+if ! hash "$VIRTUALENV" 2>/dev/null; then
+    echo "The ${VIRTUALENV} command was not found." >&2
+    exit 1
+fi
 
 for ENV in $ENV_LIST;
     do
