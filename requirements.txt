@@ -1,4 +1,5 @@
-#packages listed here are for local testing use.
+#packages listed here are for local development, testing, and packaging..
 
 pylint
 pytest
+check-manifest
