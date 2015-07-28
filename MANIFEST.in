@@ -1,0 +1,3 @@
+include *.md
+include LICENSE
+recursive-include pygments_xojo *.py
