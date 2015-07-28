@@ -28,6 +28,8 @@ def package_version():
 setup(name='pygments-xojo',
     version=package_version(),
     author='Charles Yeomans', 
+    author_email='charles@declaresub.com',
+    license='BSD',
     packages=['pygments_xojo'],
     install_requires=['pygments'],
     entry_points = {'pygments.lexers': ['xojo = pygments_xojo.xojo:XojoLexer'], 'pygments.styles': ['xojo = pygments_xojo.xojostyle:XojoStyle']},
