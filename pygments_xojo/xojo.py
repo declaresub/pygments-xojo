@@ -8,9 +8,9 @@ Lexer for the Xojo language.
 
 from __future__ import absolute_import
 import re
-from pygments.lexer import RegexLexer, words, include, default
+from pygments.lexer import RegexLexer, words, include, default, using, this
 from pygments.token import Keyword, Name, String, Literal, Number, Punctuation, Comment, \
-    Operator, Text
+    Operator, Text, Error
 
 
 __all__ = ['XojoLexer']
@@ -34,7 +34,9 @@ class _LexerOptionsMixin(object):
     def __init__(self, *args, **kwargs):
         kwargs['ensurenl'] = False
         super(_LexerOptionsMixin, self).__init__(*args, **kwargs)
+        
 
+    
 class XojoLexer(_LexerOptionsMixin, RegexLexer):
     """Lexer for Xojo."""
 
@@ -53,9 +55,9 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
     'Enum', 'Else', 'ElseIf', 'End', 'Event', 'Exception', 'Exit', 'Extends', 'Finally',
     'For', 'Function', 'Global', 'Handles', 'If', 'Implements', 'In', 'Inherits', 'Interface',
     'Lib', 'Loop', 'Module', 'Next', 'New', 'Namespace', 'Optional', 'ParamArray', 'Private',
-    'Protected', 'Public', 'Return', 'Select', 'Selector', 'Soft', 'Step', 'Structure',
+    'Protected', 'Public', 'Return', 'Select', 'Selector', 'Shared', 'Soft', 'Step', 'Structure',
     'Sub', 'Then', 'To', 'Try', 'Until', 'Wend', 'While', 'With', 'WithEvents',
-    '#if', '#else', '#endif', '#pragma']
+    '#if', '#else', '#elseif', '#endif', '#pragma']
     OPERATOR_WORDS = ['And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor', 'AddressOf', 'Array',
     'Ctype', 'GetTypeInfo', 'RaiseEvent', 'Redim', 'WeakAddressOf']
 
@@ -65,8 +67,9 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             ],
 
         'function_decl': [
-            (words(['function', 'sub'], suffix=r'\b'), Keyword.Reserved, 'function_name'),
+            (words(['function', 'sub', 'event'], suffix=WORD_SUFFIX), Keyword.Reserved, 'function_name'),
                 ],
+                
 
         'root': [
             include('whitespace'),
@@ -76,6 +79,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             (words(('Using', 'module'), suffix=WORD_SUFFIX), Keyword.Namespace, 'namespace_name'),
             (words(['class'], suffix=WORD_SUFFIX), Keyword.Reserved, 'class_name'),
             include('function_decl'),
+            (words(['property'], suffix=WORD_SUFFIX), Keyword.Reserved, 'property_decl'), 
             (words(['as'], suffix=WORD_SUFFIX), Keyword.Reserved, 'as'),
             (words(['declare'], suffix=WORD_SUFFIX), Keyword.Declaration, 'declare'),
             (words(['GOTO'], suffix=WORD_SUFFIX), Keyword.Reserved, 'goto'),
@@ -98,7 +102,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             (r'//.*', Comment),
             (r'REM\b.*', Comment),
 
-            (r'<>|<=?|>=?|[-=+*/^]', Operator),
+            (r'<>|<=?|>=?|[-=+*/^\\]', Operator),
             (words(OPERATOR_WORDS, suffix=WORD_SUFFIX), Operator.Word),
             (r'[(),.:]', Punctuation),
             (r'[^\d\W]\w*:', Name.Label),
@@ -151,4 +155,16 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             include('whitespace'),
             (IDENTIFIER, Name.XojoType, '#pop'),
             ],
+            
+        'property_decl': [
+            # this is a distinct state because get, set are keywords only within a structure
+            # declaration.
+            (words(['get', 'set']), Keyword.Reserved),
+            # RegexLexer resets the state stack to ['root'] when it encounters \n.  By 
+            # consuming the linefeed, we prevent this and keep the stack state as we want.
+            ('\n', Text),
+            include('root'),
+            (r'end property', Keyword.Reserved, '#pop'),
+            ],
+
         }
