@@ -1,8 +1,8 @@
 #! /bin/bash
 
 
-# Creates virtual environments using the Python executables in $ENV_LIST.  Existing 
-# environments are recreated.
+# Creates virtual environments for development using the Python executables in $ENV_LIST. 
+# Existing environments are recreated.
 
 
 PIP="pip"
