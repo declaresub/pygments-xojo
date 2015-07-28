@@ -25,7 +25,7 @@ def package_version():
         else:
             raise Exception('Unable to read package version.')
 
-setup(name='xojolexer',
+setup(name='pygments-xojo',
     version=package_version(),
     author='Charles Yeomans', 
     packages=['pygments_xojo'],
