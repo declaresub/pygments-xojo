@@ -1,9 +1,19 @@
+# -*- coding: utf-8 -*-
+
+"""Pygments-Xojo
+   ^^^^^^^^^^^^^
+
+Pygments-Xojo adds support for the Xojo language to the Pygments syntax highlighting
+package.
+
+    :copyright: Copyright 2015 Charles Yeomans.
+    :license: BSD, see LICENSE for details.
+"""
+
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
-import os
-import sys
-import string
 import io
+import string
 
 
 class Tox(TestCommand):
@@ -29,10 +39,14 @@ setup(name='pygments-xojo',
     version=package_version(),
     author='Charles Yeomans', 
     author_email='charles@declaresub.com',
-    license='BSD',
+    license='BSD License',
     url='https://github.com/declaresub/pygments-xojo',
+    description='Pygments highlighting for the Xojo language',
+    long_description = __doc__,
+    keywords = 'syntax highlighting xojo',
+    platforms = 'any',
     packages=['pygments_xojo'],
     install_requires=['pygments'],
-    entry_points = {'pygments.lexers': ['xojo = pygments_xojo.xojo:XojoLexer'], 'pygments.styles': ['xojo = pygments_xojo.xojostyle:XojoStyle']},
+    entry_points = {'pygments.lexers': ['xojo = pygments_xojo.lexer:XojoLexer'], 'pygments.styles': ['xojo = pygments_xojo.styles:XojoStyle']},
     cmdclass = {'test': Tox}
     )
