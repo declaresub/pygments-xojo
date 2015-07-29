@@ -1,5 +1,7 @@
-#packages listed here are for local development, testing, and packaging..
+# make_virtualenv.bash uses this file to install the listed packages into virtual
+# environments for development, testing, and packaging.
 
 pylint
 pytest
+tox
 check-manifest
