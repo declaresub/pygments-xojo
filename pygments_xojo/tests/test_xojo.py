@@ -6,7 +6,7 @@ from __future__ import absolute_import
 import re
 import pytest
 from pygments.token import *
-from pygments_xojo.xojo import XojoLexer
+from pygments_xojo.lexer import XojoLexer
 
 def test_smoke():
     """A basic smoke test."""
