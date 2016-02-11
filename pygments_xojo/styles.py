@@ -6,62 +6,70 @@ Style for the Xojo language.
 
 from pygments.style import Style
 from pygments.token import Keyword, Name, Comment, String, Error, \
-     Number, Operator, Generic, Whitespace
+     Number, Operator, Generic, Whitespace, Literal
 
 __all__ = ['XojoStyle']
 
 #pylint: disable=too-few-public-methods
 class XojoStyle(Style):
-    """The default Xojo style."""
+    """The default Xojo IDE style."""
 
     default_style = ""
     styles = {
-        Whitespace: "#bbbbbb",
-        Comment: "italic #408080",
-        Comment.Preproc: "noitalic #BC7A00",
+        # Whitespace: "#bbbbbb",
+        Comment: "#921100",
+        Comment.URL: "underline #0C33FE",
 
-        #Keyword: "bold #AA22FF",
-        Keyword: "bold #008000",
-        Keyword.Pseudo: "nobold",
-        Keyword.Type: "nobold #B00040",
+        Keyword: "#0C33FE",
 
-        Operator: "#666666",
-        Operator.Word: "bold #AA22FF",
+        Operator: "#000000",
+        Operator.Word: "#0C33FE",
 
-        Name.Builtin: "#008000",
-        Name.Function: "#0000FF",
-        Name.Class: "bold #0000FF",
-        Name.Namespace: "bold #0000FF",
-        Name.Exception: "bold #D2413A",
-        Name.Variable: "#19177C",
-        Name.Constant: "#880000",
-        Name.Label: "#A0A000",
-        Name.Entity: "bold #999999",
-        Name.Attribute: "#7D9029",
-        Name.Tag: "bold #008000",
+        Name: "#000000",
+        Name.Builtin: "#0C33FE",
+        Name.Function: "#0C33FE",
+        # Name.Class: "#000000",
+        # Name.Namespace: "#000000",
+        # Name.Exception: "bold #D2413A",
+        # Name.Variable: "#000000",
+        # Name.Constant: "#880000",
+        # Name.Label: "#000000",
+        # Name.Entity: "bold #999999",
+        # Name.Attribute: "#7D9029",
+        # Name.Tag: "bold #008000",
         Name.Decorator: "#AA22FF",
-        Name.XojoType: '#010101',
+        Name.XojoType: "#0C33FE",
 
-        String: "#BA2121",
-        String.Doc: "italic",
-        String.Interpol: "bold #BB6688",
-        String.Escape: "bold #BB6622",
-        String.Regex: "#BB6688",
-        #String.Symbol: "#B8860B",
-        String.Symbol: "#19177C",
-        String.Other: "#008000",
-        Number: "#666666",
+        String: "#7A35FD",
+        # String.Doc: "italic",
+        # String.Interpol: "bold #BB6688",
+        # String.Escape: "bold #BB6622",
+        # String.Regex: "#BB6688",
+        # String.Symbol: "#B8860B",
+        # String.Symbol: "#19177C",
+        # String.Other: "#008000",
+        
+        Number: "#417AA8",
+        Number.Float: "#007642",
+        
+        Literal: "#417AA8",
+        Literal.Unicode: "#7A35FD",
+        Name.XojoType.Color: "#000000",
+        Name.XojoType.Color.Red: "#BA1600",
+        Name.XojoType.Color.Green: "#00AB0D",
+        Name.XojoType.Color.Blue: "#0520AF",
+        Name.XojoType.Color.Alpha: "#000000",
 
-        Generic.Heading: "bold #000080",
-        Generic.Subheading: "bold #800080",
-        Generic.Deleted: "#A00000",
-        Generic.Inserted: "#00A000",
-        Generic.Error: "#FF0000",
-        Generic.Emph: "italic",
-        Generic.Strong: "bold",
-        Generic.Prompt: "bold #000080",
-        Generic.Output: "#888",
-        Generic.Traceback: "#04D",
+        # Generic.Heading: "bold #000080",
+        # Generic.Subheading: "bold #800080",
+        # Generic.Deleted: "#A00000",
+        # Generic.Inserted: "#00A000",
+        # Generic.Error: "#FF0000",
+        # Generic.Emph: "italic",
+        # Generic.Strong: "bold",
+        # Generic.Prompt: "bold #000080",
+        # Generic.Output: "#888",
+        # Generic.Traceback: "#04D",
 
-        Error: "border:#FF0000"
+        Error: "border:#FF2500 bg:#E5E5E5"
         }
