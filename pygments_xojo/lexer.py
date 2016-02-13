@@ -55,7 +55,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
     'Lib', 'Loop', 'Module', 'Next', 'New', 'Namespace', 'Optional', 'ParamArray', 'Private',
     'Protected', 'Public', 'Return', 'Select', 'Selector', 'Shared', 'Soft', 'Step', 'Structure',
     'Sub', 'Then', 'To', 'Try', 'Until', 'Wend', 'While', 'With', 'WithEvents',
-    '#if', '#else', '#elseif', '#endif', '#pragma', '#tag']
+    '#if', '#else', '#elseif', '#endif', '#pragma']
     OPERATOR_WORDS = ['And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor', 'AddressOf', 'Array',
     'Ctype', 'GetTypeInfo', 'RaiseEvent', 'Redim', 'WeakAddressOf']
     TYPES = ['Boolean', 'Byte', 'Color', 'Currency', 'Delegate', 'Double', 'Integer',
@@ -73,6 +73,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
 
         'root': [
             include('whitespace'),
+            (words(['#tag'], suffix=WORD_SUFFIX), Comment.Preproc),
             (words(DECLARATIONS, suffix=WORD_SUFFIX), Keyword.Declaration),
             (words(CONSTANTS, suffix=WORD_SUFFIX), Keyword.Constant),
             (words(PSEUDO_BUILTINS, suffix=WORD_SUFFIX), Name.Builtin.Pseudo),
@@ -93,15 +94,18 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             (r'([0-9]*\.[0-9]+)([eE][-+]?[0-9]+)?', bygroups(Number.Float, Number.Float)),
             (r'[0-9]+', Number.Integer),
                  
-            (r'(&b[01]+)(\s|_|,|[)])', bygroups(Number.Bin, Text)),
+            (r'(&b[01]+)(\s+)', bygroups(Number.Bin, Text)),
+            (r'(&b[01]+)(_|,|[)])', bygroups(Number.Bin, Punctuation)),
             (r'(&b[01]+)(\'|//)', bygroups(Number.Bin, Comment),'comment_url'),
             (r'(&b[01]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Bin, Operator)),
                  
-            (r'(&o[0-7]+)(\s|_|,|[)])', bygroups(Number.Oct, Text)),
+            (r'(&o[0-7]+)(\s+)', bygroups(Number.Oct, Text)),
+            (r'(&o[0-7]+)(_|,|[)])', bygroups(Number.Oct, Punctuation)),
             (r'(&o[0-7]+)(\'|//)', bygroups(Number.Oct, Comment),'comment_url'),
             (r'(&o[0-7]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Oct, Operator)),
                  
-            (r'(&h[0-9a-fA-F]+)(\s|_|,|[)])', bygroups(Number.Hex, Text)),
+            (r'(&h[0-9a-fA-F]+)(\s+)', bygroups(Number.Oct, Text)),
+            (r'(&h[0-9a-fA-F]+)(_|,|[)])', bygroups(Number.Oct, Punctuation)),
             (r'(&h[0-9a-fA-F]+)(\'|//)', bygroups(Number.Hex, Comment),'comment_url'),
             (r'(&h[0-9a-fA-F]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Hex, Operator)),
            

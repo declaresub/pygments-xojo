@@ -19,7 +19,7 @@ class XojoStyle(Style):
         # Whitespace: "#bbbbbb",
         Comment: "#921100",
         Comment.URL: "underline #0C33FE",
-
+        Comment.Preproc: "#0C33FE",
         Keyword: "#0C33FE",
 
         Operator: "#000000",
