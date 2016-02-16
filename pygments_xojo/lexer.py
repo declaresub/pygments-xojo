@@ -8,7 +8,7 @@ Lexer for the Xojo language.
 
 from __future__ import absolute_import
 import re
-from pygments.lexer import RegexLexer, words, include, default, using, this
+from pygments.lexer import RegexLexer, bygroups, words, include, default, using, this
 from pygments.token import Keyword, Name, String, Literal, Number, Punctuation, Comment, \
     Operator, Text, Error
 
@@ -22,8 +22,6 @@ IDENTIFIER_FQ = r'[^\d\W]\w*(\.[^\d\W]\w*)*'
 LITERAL_STRING = r'"(""|[^"])*"'
 LITERAL_UNICODE = r'&u[0-9a-fA-F]+'
 WHITESPACE = r'[\ \t]+'
-LITERAL_COLOR_32 = r'&c[0-9a-fA-F]{8}'
-LITERAL_COLOR_24 = r'&c[0-9a-fA-F]{6}'
 DECLARE = r'(soft\s+)?declare[^)]+\)'
 WORD_SUFFIX = r'\b'
 
@@ -51,7 +49,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
     BUILTINS = ['AddHandler', 'Call', 'CurrentMethodName',
     'Raise', 'RemoveHandler']
     KEYWORDS = ['Aggregates', 'Assigns', 'Attributes', 'Break', 'ByRef', 'ByVal',
-    'Case', 'Catch', 'Class', 'Continue', 'Delegate', 'Do', 'DownTo', 'Each',
+    'Case', 'Catch', 'Class', 'Continue', 'Do', 'DownTo', 'Each',
     'Enum', 'Else', 'ElseIf', 'End', 'Event', 'Exception', 'Exit', 'Extends', 'Finally',
     'For', 'Function', 'Global', 'Handles', 'If', 'Implements', 'In', 'Inherits', 'Interface',
     'Lib', 'Loop', 'Module', 'Next', 'New', 'Namespace', 'Optional', 'ParamArray', 'Private',
@@ -60,7 +58,9 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
     '#if', '#else', '#elseif', '#endif', '#pragma']
     OPERATOR_WORDS = ['And', 'Is', 'IsA', 'Mod', 'Not', 'Or', 'Xor', 'AddressOf', 'Array',
     'Ctype', 'GetTypeInfo', 'RaiseEvent', 'Redim', 'WeakAddressOf']
-
+    TYPES = ['Boolean', 'Byte', 'Color', 'Currency', 'Delegate', 'Double', 'Integer',
+    'Int8', 'Int16', 'Int32', 'Int64', 'UInt8', 'UInt16', 'UInt32', 'UInt64', 'Short', 'Single', 'String',
+    'Structure']
     tokens = {
         'whitespace': [
             (r'[\ \t]+', Text),
@@ -73,6 +73,7 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
 
         'root': [
             include('whitespace'),
+            (words(['#tag'], suffix=WORD_SUFFIX), Comment.Preproc),
             (words(DECLARATIONS, suffix=WORD_SUFFIX), Keyword.Declaration),
             (words(CONSTANTS, suffix=WORD_SUFFIX), Keyword.Constant),
             (words(PSEUDO_BUILTINS, suffix=WORD_SUFFIX), Name.Builtin.Pseudo),
@@ -85,22 +86,38 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             (words(['GOTO'], suffix=WORD_SUFFIX), Keyword.Reserved, 'goto'),
             (words(BUILTINS, suffix=WORD_SUFFIX), Name.Builtin),
             (words(KEYWORDS, suffix=WORD_SUFFIX), Keyword.Reserved),
-
+            (words(TYPES, suffix=WORD_SUFFIX), Keyword.Type),
+                 
             # Literals
             (LITERAL_STRING, String),
-            (LITERAL_UNICODE, Literal),
+            (LITERAL_UNICODE, Literal.Unicode),
+            (r'([0-9]*\.[0-9]+)([eE][-+]?[0-9]+)?', bygroups(Number.Float, Number.Float)),
             (r'[0-9]+', Number.Integer),
-            (r'&b[01]+', Number.Bin),
-            (r'&o[0-7]+', Number.Oct),
-            (r'&h[0-9a-fA-F]+', Number.Hex),
-            (LITERAL_COLOR_32, Literal),
-            (LITERAL_COLOR_24, Literal),
+                 
+            (r'(&b[01]+)(\s+)', bygroups(Number.Bin, Text)),
+            (r'(&b[01]+)(_|,|[)])', bygroups(Number.Bin, Punctuation)),
+            (r'(&b[01]+)(\'|//)', bygroups(Number.Bin, Comment),'comment_url'),
+            (r'(&b[01]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Bin, Operator)),
+                 
+            (r'(&o[0-7]+)(\s+)', bygroups(Number.Oct, Text)),
+            (r'(&o[0-7]+)(_|,|[)])', bygroups(Number.Oct, Punctuation)),
+            (r'(&o[0-7]+)(\'|//)', bygroups(Number.Oct, Comment),'comment_url'),
+            (r'(&o[0-7]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Oct, Operator)),
+                 
+            (r'(&h[0-9a-fA-F]+)(\s+)', bygroups(Number.Oct, Text)),
+            (r'(&h[0-9a-fA-F]+)(_|,|[)])', bygroups(Number.Oct, Punctuation)),
+            (r'(&h[0-9a-fA-F]+)(\'|//)', bygroups(Number.Hex, Comment),'comment_url'),
+            (r'(&h[0-9a-fA-F]+)(<>|<=?|>=?|[-=+*/^\\])', bygroups(Number.Hex, Operator)),
+           
+            (r'(&c)([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})?',
+             bygroups(Name.XojoType.Color, Name.XojoType.Color.Red, Name.XojoType.Color.Green,
+                      Name.XojoType.Color.Blue, Name.XojoType.Color.Alpha)),
 
             # line continuation
             (r'_(?!\w)', Punctuation),
-            (r"\'.*", Comment),
-            (r'//.*', Comment),
-            (r'REM\b.*', Comment),
+            (r'\'', Comment, 'comment_url'),
+            (r'//', Comment, 'comment_url'),
+            (r'REM\b', Comment, 'comment_url'),
 
             (r'<>|<=?|>=?|[-=+*/^\\]', Operator),
             (words(OPERATOR_WORDS, suffix=WORD_SUFFIX), Operator.Word),
@@ -165,6 +182,18 @@ class XojoLexer(_LexerOptionsMixin, RegexLexer):
             ('\n', Text),
             include('root'),
             (r'end property', Keyword.Reserved, '#pop'),
+            ],
+
+        'comment_url': [
+            (r'http\://\S*', Comment.URL),
+            (r'https\://\S*', Comment.URL),
+            (r'ftp\://\S*', Comment.URL),
+            (r'ftps\://\S*', Comment.URL),
+            (r'rb-feedback\://\S*', Comment.URL),
+            (r'feedback\://\S*', Comment.URL),
+            (r'mailto\:\S*', Comment.URL),
+            ('\n', Comment, '#pop'),
+            (r'.', Comment),
             ],
 
         }
